@@ -328,6 +328,7 @@
 #define cbExtendUCharMap                1722
 #define cbAutoSaveSizePos               1723
 #define bDosBoxSettings                 1724
+#define cbPixelSize                     1724
 #define cbShellNoZoneCheck              1725
 #define bConFontCancel                  1726
 #define tConsoleFontFace                1727

@@ -1223,8 +1223,8 @@ RECT CConEmuMain::GetDefaultRect()
 			gpConEmu->wndX = rcWnd.left;
 			gpConEmu->wndY = rcWnd.top;
 			RECT rcCon = CalcRect(CER_CONSOLE_ALL, rcWnd, CER_MAIN);
-			gpConEmu->wndWidth = rcCon.right;
-			gpConEmu->wndHeight = rcCon.bottom;
+			gpConEmu->wndWidth = gpSet->isPixelSize ? rcWnd.right : rcCon.right;
+			gpConEmu->wndHeight = gpSet->isPixelSize ? rcWnd.bottom : rcCon.bottom;
 
 			OnMoving(&rcWnd);
 
@@ -4110,7 +4110,10 @@ void CConEmuMain::StoreNormalRect(RECT* prcWnd)
 			// так что и TextWidth/TextHeight не обновилс€
 			//-- gpSetCls->UpdateSize(mp_ VActive->TextWidth, mp_ VActive->TextHeight);
 			RECT rcAll = CVConGroup::AllTextRect();
-			gpSetCls->UpdateSize(rcAll.right, rcAll.bottom);
+			if (gpSet->isPixelSize)
+				gpSetCls->UpdateSize(rcNormal.right, rcNormal.bottom);
+			else
+				gpSetCls->UpdateSize(rcAll.right, rcAll.bottom);
 		}
 	}
 }
@@ -4519,7 +4522,10 @@ bool CConEmuMain::SetWindowMode(ConEmuWindowMode inMode, BOOL abForce /*= FALSE*
 			}
 			else
 			{
-				rcNew = CalcRect(CER_MAIN, consoleSize, CER_CONSOLE_ALL);
+				if (gpSet->isPixelSize)
+					rcNew = consoleSize;
+				else
+					rcNew = CalcRect(CER_MAIN, consoleSize, CER_CONSOLE_ALL);
 				//int nWidth = rcNew.right-rcNew.left;
 				//int nHeight = rcNew.bottom-rcNew.top;
 				//rcNew.left+=gpConEmu->wndX; rcNew.top+=gpConEmu->wndY;
@@ -5162,6 +5168,12 @@ void CConEmuMain::OnConsoleResize(BOOL abPosted/*=FALSE*/)
 		return; // если минимизировано - ничего не делать
 	}
 
+	//update window size
+	if (gpSet->isPixelSize) {
+		RECT rcClient; GetWindowRect(ghWnd, &rcClient);
+		gpSetCls->UpdateSize(rcClient.right, rcClient.bottom);
+	}
+
 	// Ѕыло ли реальное изменение размеров?
 	BOOL lbSizingToDo  = (mouse.state & MOUSE_SIZING_TODO) == MOUSE_SIZING_TODO;
 	bool lbIsSizing = isSizing();
@@ -5366,7 +5378,11 @@ LRESULT CConEmuMain::OnSizing(WPARAM wParam, LPARAM lParam)
 			// –ассчитать желаемый размер консоли
 			//srctWindow = ConsoleSizeFromWindow(&wndSizeRect, true /* frameIncluded */);
 			AutoSizeFont(wndSizeRect, CER_MAIN);
-			srctWindow = CalcRect(CER_CONSOLE_ALL, wndSizeRect, CER_MAIN);
+			if (gpSet->isPixelSize)
+				srctWindow = wndSizeRect;
+			else
+				srctWindow = CalcRect(CER_CONSOLE_ALL, wndSizeRect, CER_MAIN);
+			
 
 			// ћинимально допустимые размеры консоли
 			if (srctWindow.right < MIN_CON_WIDTH)
@@ -10946,7 +10962,16 @@ HMONITOR CConEmuMain::GetNearestMonitor(MONITORINFO* pmi /*= NULL*/, LPRECT prcW
 	{
 		_ASSERTE(gpConEmu->wndWidth>0 && gpConEmu->wndHeight>0);
 		COORD conSize = MakeCoord(gpConEmu->wndWidth,gpConEmu->wndHeight);
-		RECT rcEvalWnd = MakeRect(gpConEmu->wndX, gpConEmu->wndY, gpConEmu->wndX + conSize.X * gpSetCls->FontWidth(), gpConEmu->wndY + conSize.Y * gpSetCls->FontHeight());
+		int width, height;
+		if (gpSet->isPixelSize) {
+			width = gpConEmu->wndWidth;
+			height = gpConEmu->wndHeight;
+		}
+		else {
+			width = conSize.X * gpSetCls->FontWidth();
+			height = conSize.Y * gpSetCls->FontHeight();
+		}
+		RECT rcEvalWnd = MakeRect(gpConEmu->wndX, gpConEmu->wndY, gpConEmu->wndX + width, gpConEmu->wndY + height);
 
 		hMon = MonitorFromRect(&rcEvalWnd, MONITOR_DEFAULTTONEAREST);
 	}

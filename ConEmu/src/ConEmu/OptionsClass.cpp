@@ -1999,6 +1999,8 @@ LRESULT CSettings::OnInitDialog_WndPosSize(HWND hWnd2, bool abInitial)
 
 	checkDlgButton(hWnd2, cbUseCurrentSizePos, gpSet->isUseCurrentSizePos);
 
+	checkDlgButton(hWnd2, cbPixelSize, gpSet->isPixelSize);
+
 	if (gpSet->isQuakeStyle || !gpSet->isUseCurrentSizePos)
 		checkRadioButton(hWnd2, rNormal, rFullScreen, gpSet->_WindowMode);
 	else if (gpConEmu->isFullScreen())
@@ -4574,6 +4576,9 @@ LRESULT CSettings::OnButtonClicked(HWND hWnd2, WPARAM wParam, LPARAM lParam)
 			break;
 		case cbAutoSaveSizePos:
 			gpSet->isAutoSaveSizePos = IsChecked(hWnd2, cbAutoSaveSizePos);
+			break;
+		case cbPixelSize:
+			gpSet->isPixelSize = IsChecked(hWnd2, cbPixelSize);
 			break;
 		case cbFontAuto:
 			gpSet->isFontAutoSize = IsChecked(hWnd2, cbFontAuto);

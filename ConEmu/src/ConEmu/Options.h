@@ -1213,6 +1213,7 @@ struct Settings
 		bool isAutoSaveSizePos;
 		//reg->Load(L"UseCurrentSizePos", isUseCurrentSizePos);
 		bool isUseCurrentSizePos; // Show in settings dialog and save current window size/pos
+		bool isPixelSize; // Use pixel window size
 
 		bool isIntegralSize();
 

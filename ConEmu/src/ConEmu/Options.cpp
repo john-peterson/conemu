@@ -518,7 +518,7 @@ void Settings::InitSettings()
 		_wndX = rcWork.left; _wndY = rcWork.top;
 	}
 	wndCascade = true;
-	isAutoSaveSizePos = false; mb_SizePosAutoSaved = false;
+	isAutoSaveSizePos = false; mb_SizePosAutoSaved = false; isPixelSize = false;
 	isConVisible = false; //isLockRealConsolePos = false;
 	isUseInjects = false; // гррр... Disclaimer#2
 
@@ -2536,6 +2536,7 @@ void Settings::LoadSettings(bool *rbNeedCreateVanilla)
 		reg->Load(L"ConWnd X", _wndX); /*if (wndX<-10) wndX = 0;*/
 		reg->Load(L"ConWnd Y", _wndY); /*if (wndY<-10) wndY = 0;*/
 		reg->Load(L"AutoSaveSizePos", isAutoSaveSizePos);
+		reg->Load(L"PixelSize", isPixelSize);
 		// ЭТО не влияет на szDefCmd. Только прямое указание флажка "/BufferHeight N"
 		// может сменить (умолчательную) команду запуска на "cmd" или "far"
 		reg->Load(L"Cascaded", wndCascade);
@@ -2548,8 +2549,8 @@ void Settings::LoadSettings(bool *rbNeedCreateVanilla)
 			gpConEmu->LogString(szInfo);
 		}
 
-		if (!_wndWidth) _wndWidth = 80; else if (_wndWidth>1000) _wndWidth = 1000;
-		if (!_wndHeight) _wndHeight = 25; else if (_wndHeight>500) _wndHeight = 500;
+		if (!_wndWidth) _wndWidth = gpSet->isPixelSize ? 80 * gpSetCls->FontWidth() : 80; else if (!gpSet->isPixelSize && _wndWidth>1000) _wndWidth = 1000;
+		if (!_wndHeight) _wndHeight = gpSet->isPixelSize ? 25 * gpSetCls->FontHeight() : 25; else if (!gpSet->isPixelSize && _wndHeight>500) _wndHeight = 500;
 
 		//TODO: Эти два параметра не сохраняются
 		reg->Load(L"16bit Height", ntvdmHeight);
@@ -3097,6 +3098,7 @@ void Settings::SaveSizePosOnExit()
 			reg->Save(L"ConWnd Y", isUseCurrentSizePos ? gpConEmu->wndY : _wndY);
 			reg->Save(L"16bit Height", ntvdmHeight);
 			reg->Save(L"AutoSaveSizePos", isAutoSaveSizePos);
+			reg->Save(L"PixelSize", isPixelSize);
 		}
 
 		if (mb_StatusSettingsWasChanged)
@@ -3445,6 +3447,7 @@ BOOL Settings::SaveSettings(BOOL abSilent /*= FALSE*/, const SettingsStorage* ap
 		reg->Save(L"ConWnd Y", isUseCurrentSizePos ? gpConEmu->wndY : _wndY);
 		reg->Save(L"16bit Height", ntvdmHeight);
 		reg->Save(L"AutoSaveSizePos", isAutoSaveSizePos);
+		reg->Save(L"PixelSize", isPixelSize);
 		mb_SizePosAutoSaved = false; // Раз было инициированное пользователей сохранение настроек - сбросим флажок
 		reg->Save(L"QuakeStyle", isQuakeStyle);
 		reg->Save(L"QuakeAnimation", nQuakeAnimation);
